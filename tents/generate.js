@@ -52,19 +52,11 @@ export class TentsGenerator {
     // generates complete board with tree placements and their matching tents. does
     // not guarantee solution is unique.
     generate() {
-        // hardcoded values for puzzle sizes
-        let numTrees = -1;
-        let clusterMaxSize = -1;
-        if (this.size == 6) {
-            numTrees = 8;
-            clusterMaxSize = 2;
-        } else if (this.size == 10) {
-            numTrees = 22;
-            clusterMaxSize = 3;
-        } else {
-            console.log('size not supported');
-            return;
-        }
+        const preset = this.presets.find(item => item.size == this.size);
+        
+        // get values from preset
+        let numTrees = preset.numTrees;
+        let clusterMaxSize = preset.clusterMaxSize;
 
         let treesPlaced = 0;
         let NUM_RETRY_ATTEMPTS = 10000;
