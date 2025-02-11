@@ -6,20 +6,36 @@ export class TentsGenerator {
         this.board = [];
     }
 
+    // TODO: add option for whether solution should be included in output
     generate10by10() {
         // initialize
         this.size = 10;
         this.board = this.emptyBoard();
 
-        this.generate(10);
+        this.generate();
+
+        if (this.board == null) {
+            console.log('failed to generate board. please retry.')
+            return [null, null, null]; 
+        } 
+
+        return [this.board, ...this.generateHints()];
     }
 
+    // TODO: add option for whether solution should be included in output
     generate6by6() {
         // initialize
         this.size = 6;
         this.board = this.emptyBoard();
 
-        this.generate(6);
+        this.generate();
+
+        if (this.board == null) {
+            console.log('failed to generate board. please retry.')
+            return [null, null, null]; 
+        } 
+        
+        return [this.board, ...this.generateHints()];
     }
 
     generate() {
@@ -38,9 +54,17 @@ export class TentsGenerator {
         }
 
         let treesPlaced = 0;
+        let NUM_RETRY_ATTEMPTS = 10000;
         
         outer_loop:
         while (treesPlaced < numTrees) {
+            // if attempts have run out, the generated board until this point probably does not yield
+            // additional tree or tent placements. set board to null and exit
+            if (NUM_RETRY_ATTEMPTS == 0) {
+                this.board = null;
+                return;
+            }
+
             // determine cluster size 
             const clusterSize = Math.min(
                 randIntBtw(1, clusterMaxSize),
@@ -58,6 +82,8 @@ export class TentsGenerator {
                 // if failed to place all clusterSize number of trees, just 
                 // move on to next cluster  (more efficient this way)
                 if (availableCells.length == 0) {
+                    NUM_RETRY_ATTEMPTS -= 1;
+
                     continue outer_loop;
                 }
 
@@ -67,6 +93,8 @@ export class TentsGenerator {
 
                 const tentCoords = this.tentPlacements(tree_row, tree_col);
                 if (tentCoords == null) {
+                    NUM_RETRY_ATTEMPTS -= 1;
+
                     // unset tree since there can be no valid tent for it
                     this.board[tree_row][tree_col] = 0;
                     continue outer_loop;
@@ -85,8 +113,8 @@ export class TentsGenerator {
             }
         }
 
-        this.printBoard();
-        return this.board;
+        // uncomment to print generated board
+        // this.printBoard();
     }
 
     // returns all neighbors (including diagonals) of a type
@@ -156,6 +184,28 @@ export class TentsGenerator {
             board.push(row);
         }
         return board;
+    }
+
+    generateHints() {
+        const rowHints = [];
+        for (let i = 0; i < this.board.length; i++) {
+            let rowTentsCount = 0;
+            for (let j = 0; j < this.board[0].length; j++) {
+                if (this.board[i][j] == 2) rowTentsCount++;
+            }
+            rowHints.push(rowTentsCount);
+        }
+
+        const colHints = [];
+        for (let j = 0; j < this.board[0].length; j++) {
+            let colTentsCount = 0;
+            for (let i = 0; i < this.board.length; i++) {
+                if (this.board[i][j] == 2) colTentsCount++;
+            }
+            colHints.push(colTentsCount);
+        }
+
+        return [rowHints, colHints];
     }
 
     printBoard() {
