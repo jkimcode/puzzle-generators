@@ -1,43 +1,56 @@
 import { randIntBtw, randomPick } from "../utils/utils.js";
+import { TentsSolver } from "./solve.js";
 
 export class TentsGenerator {
     constructor() {
         this.size = -1;
         this.board = [];
+
+        this.presets = [
+            { size: 10, numTrees: 22, clusterMaxSize: 3},
+            { size: 6, numTrees: 8, clusterMaxSize: 2}
+        ];
     }
 
-    // TODO: add option for whether solution should be included in output
-    generate10by10() {
+    generateUnique(size, includeSolution) {
+        // check if size is supported
+        const preset = this.presets.find(item => item.size == size);
+        if (preset == undefined) {
+            console.log('that size is not supported yet');
+            return [null, null, null];
+        }
+
         // initialize
-        this.size = 10;
+        this.size = preset.size;
         this.board = this.emptyBoard();
 
         this.generate();
 
-        if (this.board == null) {
-            console.log('failed to generate board. please retry.')
-            return [null, null, null]; 
-        } 
+        // if failed to generate initial board, return
+        if (!this.board) {
+            console.log('failed to generate initial board')
+            return [null, null, null];
+        }
 
-        return [this.board, ...this.generateHints()];
+        // check if board's solution is unique
+        const hints = this.generateHints();
+        const treesOnly = this.getTreesOnlyBoard();
+
+        const solver = new TentsSolver(treesOnly, hints[0], hints[1]);
+        const solutions = solver.solve();
+
+        if (solutions.length == 1) {
+            console.log('generated board with unique solution');
+            this.printBoard();
+            return [includeSolution ? this.board : treesOnly, hints[0], hints[1]];
+        } else {
+            console.log('solution to generated board not unique. try again.')
+            return [null, null, null];
+        }
     }
 
-    // TODO: add option for whether solution should be included in output
-    generate6by6() {
-        // initialize
-        this.size = 6;
-        this.board = this.emptyBoard();
-
-        this.generate();
-
-        if (this.board == null) {
-            console.log('failed to generate board. please retry.')
-            return [null, null, null]; 
-        } 
-        
-        return [this.board, ...this.generateHints()];
-    }
-
+    // generates complete board with tree placements and their matching tents. does
+    // not guarantee solution is unique.
     generate() {
         // hardcoded values for puzzle sizes
         let numTrees = -1;
@@ -206,6 +219,23 @@ export class TentsGenerator {
         }
 
         return [rowHints, colHints];
+    }
+
+    // returns copy of current board where tents have been cleared out
+    getTreesOnlyBoard() {
+        const result = [];
+        for (let i = 0; i < this.board.length; i++) {
+            const row = [];
+            for (let j = 0; j < this.board[0].length; j++) {
+                if (this.board[i][j] == 1) {
+                    row.push(1);
+                } else {
+                    row.push(0);
+                }
+            }
+            result.push(row);
+        }
+        return result;
     }
 
     printBoard() {

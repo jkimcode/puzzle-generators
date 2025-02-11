@@ -1,5 +1,8 @@
 export class TentsSolver {
     /*
+     * Finds all solutions to given tent puzzle. Can be used independently
+     * of the tentes generator.
+     * 
      * Args
      * board: 2D array of tents puzzle, where 0 is empty cells and 1 is tree
      * rowHints: 1D array of row hints
@@ -14,21 +17,24 @@ export class TentsSolver {
 
         // used by solver
         this.treeCoords = this.findTreeCoords();
+        this.solutions = [];
     }
 
+    // returns all solutions, where each solution is an array of coordinates of tent placements
     solve() {
-        const coords = this.findTreeCoords();
-
         this.backtrack(0);
+
+        return this.solutions;
     }
 
-    // on checking if solution produced is valid and that it finds all solutions if
-    // there are multiple
     backtrack(idx) {
         if (idx == this.treeCoords.length) {
             // solved. uncomment below to print board when a solution has been found.
-            console.log('solved')
-            this.printBoard();
+            // console.log('solved')
+            // this.printBoard();
+
+            const shortened = this.getShortenedSolution();
+            this.solutions.push(shortened);
 
             return;
         }
@@ -116,6 +122,17 @@ export class TentsSolver {
         }
 
         return result;
+    }
+
+    // returns array of current tent placements (used when solution is found)
+    getShortenedSolution() {
+        const tents = [];
+        for (let i = 0; i < this.board.length; i++) {
+            for (let j = 0; j < this.board[0].length; j++) {
+                if (this.board[i][j] == 2) tents.push([i,j]);
+            }
+        }
+        return tents;
     }
 
     printBoard() {
