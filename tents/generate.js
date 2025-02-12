@@ -2,6 +2,9 @@ import { randIntBtw, randomPick } from "../utils/utils.js";
 import { TentsSolver } from "./solve.js";
 
 export class TentsGenerator {
+    /*
+     * Generates tents puzzle with unique solution.
+     */
     constructor() {
         this.size = -1;
         this.board = [];

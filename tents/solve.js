@@ -29,7 +29,7 @@ export class TentsSolver {
 
     backtrack(idx) {
         if (idx == this.treeCoords.length) {
-            // solved. uncomment below to print board when a solution has been found.
+            // uncomment below to print board when a solution has been found.
             // console.log('solved')
             // this.printBoard();
 
