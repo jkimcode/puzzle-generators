@@ -17,8 +17,8 @@ export class StarsPlacer {
         this.#N = N;
     }
 
-    // if shorten=false, full grid array is returned
-    // if shorten=true, only star coordinates returned
+    // if shorten=false, full grid array is returned. otherwise, only 
+    // the star coordinates of solution are returned.
     generate(shorten=false) {
         // reset board
         this.#initBoard();
@@ -31,7 +31,7 @@ export class StarsPlacer {
 
     #backtrack(row) {
         if (row == this.#size) {
-            console.log('solved');
+            // if solved, record the solution
             this.#solution = clone2DArray(this.#board);
 
             return true;

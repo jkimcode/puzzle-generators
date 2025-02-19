@@ -35,3 +35,16 @@ export function clone2DArray(arr) {
     }
     return result;
 }
+
+export function print2DArrayAsGrid(arr) {
+    let boardStr = "";
+    for (let i = 0; i < arr.length; i++) {
+        let rowStr = "";
+        for (let j = 0; j < arr[0].length; j++) {
+            rowStr = rowStr.concat(`${arr[i][j]}`);
+        }
+        rowStr = rowStr.concat("\n");
+        boardStr = boardStr.concat(rowStr);
+    }
+    console.log(boardStr);
+}

@@ -8,5 +8,8 @@
   "type": "module",
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "z3-solver": "^4.14.0"
+  }
 }
