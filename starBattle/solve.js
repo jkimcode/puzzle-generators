@@ -115,7 +115,7 @@ export class SBSolver {
             for (let j = 0; j < size; j++) {
                 const val = parseInt(`${model.eval(cells[i][j])}`);
                 if (val === 1) {
-                    if (sameSoln === null) sameSoln = cells[i][j].eq(1);
+                    if (sameSoln == null) sameSoln = cells[i][j].eq(1);
                     else sameSoln = And(sameSoln, cells[i][j].eq(1));
                 }
             }

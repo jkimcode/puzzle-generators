@@ -2,6 +2,11 @@ import { print2DArrayAsGrid, randomPick, shuffle } from "../utils/utils.js";
 import { SBSolver } from "./solve.js";
 import { StarsPlacer } from "./stars.js";
 
+/*
+ * Tries to star battle puzzle with unique solution.
+ * 
+ * TODO: increase success rate of generating board that has unique solution
+ */
 export class SBGenerator {
 
     #size = 0;
@@ -13,11 +18,12 @@ export class SBGenerator {
     constructor() {
         this.presets = [
             { size: 10, N: 2, minRegionArea: 3 },
-            { size: 6, N: 1, minRegionArea: 2 }
+            { size: 6, N: 1, minRegionArea: 2 },
+            { size: 5, N: 1, minRegionArea: 2 }
         ];
     }
 
-    generateUnique(size, N) {
+    async generateUnique(size, N) {
         // check if combination of size and N is supported
         const preset = this.presets.find(item => item.size == size && item.N == N);
         if (preset == undefined) {
@@ -35,16 +41,20 @@ export class SBGenerator {
         this.#initBoard();
 
         // generate regions around stars
-        if (!this.#generate()) {
-            console.log('could not fill board with regions. try again');
-        } else {
-            print2DArrayAsGrid(this.#board);
-            print2DArrayAsGrid(this.#solution);
+        while (true) {
+            this.#initBoard();
+            if (this.#generate()) break;
         }
+        
+        const solver = new SBSolver();
+        const solveResult = await solver.solve(this.#board, this.#N);
 
-        // check if solution is unique
-        // const solver = new SBSolver();
-        // solver.solve();
+        if (!solveResult.soln) {
+            console.log('could not find solution');
+        } else {
+            if (solveResult.isUnique) console.log('generated unique board');
+            else console.log('board does not have unique solution');
+        }
     }
 
     // generates regions around stars. does not guarantee regions lead to unique solution
@@ -54,10 +64,10 @@ export class SBGenerator {
             let [row, col] = this.#randomUnassignedCell();
 
             // try to fill a region of N stars
-            let numAttempts = 100;
+            let numAttempts = 10;
             let isRegionFound = false;
             while (numAttempts > 0) {
-                if (this.#growRegion(row, col, String.fromCharCode(i + 97))) {
+                if (this.#growRegion(row, col, i+1)) {
                     isRegionFound = true;
                     break;
                 }
@@ -139,8 +149,6 @@ export class SBGenerator {
             const [row, col] = queue.shift();
             const neighborRegions = this.#getNeighborRegions(row, col);
 
-            console.log(neighborRegions);
-
             // if cell doesn't have neighboring regions yet, add it back to queue
             if (neighborRegions.length == 0) {
                 queue.push([row, col]);
@@ -163,10 +171,8 @@ export class SBGenerator {
             result.push(this.#board[row+1][col]);
 
         // remove duplicates
-        // const filtered = result.filter((item, idx) => idx == result.indexOf(item));
-        // return filtered;
-
-        return result;
+        const filtered = result.filter((item, idx) => idx == result.indexOf(item));
+        return filtered;
     }
 
     #randomUnassignedCell() {
@@ -189,5 +195,48 @@ export class SBGenerator {
             board.push(row);
         }
         this.#board = board;
+    }
+
+    // for debugging purposes
+    #printBoard(soln) {
+        let boardStr = "";
+        for (let i = 0; i < this.#size; i++) {
+            let rowStr = "";
+            let rowBorderStr = "";
+            for (let j = 0; j < this.#size; j++) {
+                if (j == 0) {
+                    rowStr += "|";
+                    rowBorderStr += " ";
+                } 
+                
+                if (j < this.#size-1) {
+                    if (this.#board[i][j] != this.#board[i][j+1]) {
+                        if (soln[i][j] == 1) rowStr += " *|";
+                        else rowStr += "  |";
+                    } else {
+                        if (soln[i][j] == 1) rowStr += " * ";
+                        else rowStr += "   ";
+                    }
+                } else {
+                    if (soln[i][j] == 1) rowStr += " *|";
+                    else rowStr += "  |";
+                }
+
+                if (i < this.#size-1) {
+                    if (this.#board[i][j] != this.#board[i+1][j]) {
+                        rowBorderStr += "---";
+                    } else {
+                        rowBorderStr += "   ";
+                    }
+                } else {
+                    rowBorderStr += "---";
+                }
+            }
+            rowStr += "\n";
+            rowBorderStr += "\n";
+            boardStr += rowStr;
+            boardStr += rowBorderStr;
+        }
+        console.log(boardStr);
     }
 }
