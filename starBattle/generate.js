@@ -3,9 +3,10 @@ import { SBSolver } from "./solve.js";
 import { StarsPlacer } from "./stars.js";
 
 /*
- * Tries to star battle puzzle with unique solution.
+ * Attempts to generate star battle puzzle with unique solution (currently unable to
+ * generate board with unique solution 100% of the time)
  * 
- * TODO: increase success rate of generating board that has unique solution
+ * TODO: increase success rate 
  */
 export class SBGenerator {
 
